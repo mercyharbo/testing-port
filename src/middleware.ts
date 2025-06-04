@@ -54,9 +54,15 @@ export async function middleware(request: NextRequest) {
     `[Middleware] Path: ${path}, Authenticated: ${isAuthenticated}, UserType: ${userType}`
   )
 
-  // Handle auth routes: Redirect authenticated users to their dashboard
+  // Handle auth routes and email verification
   if (authRoutes.includes(path) || path.startsWith('/auth/')) {
-    if (isAuthenticated && userType) {
+    // Always allow access to email verification routes
+    if (path === '/creative-email' || path === '/recruiter-email') {
+      return NextResponse.next()
+    }
+
+    // Only redirect authenticated users with valid access tokens
+    if (isAuthenticated && userType && accessToken) {
       const dashboardUrl =
         userType === 'creator' ? '/users/creators' : '/users/recruiters'
       if (path !== dashboardUrl) {
@@ -83,8 +89,8 @@ export async function middleware(request: NextRequest) {
     isRecruiterUserRoute
 
   if (isCreatorRoute || isRecruiterRoute || isUserRoute) {
-    // Check authentication first
-    if (!isAuthenticated) {
+    // Check for valid authentication with access token
+    if (!isAuthenticated || !accessToken) {
       console.log(`[Middleware] Redirecting to /login from ${path}`)
       return NextResponse.redirect(
         new URL(`/login?redirect=${encodeURIComponent(path)}`, request.url)
