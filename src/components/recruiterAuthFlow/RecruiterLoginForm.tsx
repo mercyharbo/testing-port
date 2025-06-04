@@ -2,6 +2,7 @@
 
 import { RecruiterAuth } from '@/src/lib/requests/auth.new'
 import { useFormik } from 'formik'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import toast from 'react-hot-toast'
@@ -126,9 +127,12 @@ export default function RecruiterLoginForm() {
 
       <p className='text-sm text-white text-center mx-auto flex justify-center items-center gap-3'>
         Don&apos;t have an account?{' '}
-        <a href='/sign-up' className='text-white font-semibold hover:underline'>
+        <Link
+          href='/recruiter-sign-up'
+          className='text-white font-semibold hover:underline'
+        >
           Sign up
-        </a>
+        </Link>
       </p>
     </main>
   )
