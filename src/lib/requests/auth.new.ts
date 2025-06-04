@@ -148,14 +148,13 @@ export const CreatorAuth = {
         requestData
       )
 
-      if (response.data.token) {
-        AuthStorage.setAuth(
-          // response.data.token,
-          // 'creator',
-          // response.data.data,
-          formData.email
-        )
-      }
+      // Only store email and userType during registration
+      AuthStorage.setAuth(
+        undefined, // no token yet
+        'creator', // user type
+        undefined, // no user data yet
+        formData.email // store email for OTP verification
+      )
 
       return response.data
     } catch (error) {
@@ -310,6 +309,14 @@ export const RecruiterAuth = {
       const response = await apiClient.post(
         ENDPOINTS.RECRUITER.REGISTER,
         requestData
+      )
+
+      // Only store email and userType during registration
+      AuthStorage.setAuth(
+        undefined, // no token yet
+        'recruiter', // user type
+        undefined, // no user data yet
+        formData.email // store email for OTP verification
       )
 
       // Return the response data directly as it already contains status, message, etc.
