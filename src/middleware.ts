@@ -10,18 +10,20 @@ const authRoutes = [
   '/welcome-onboarding',
   '/why-onboarding',
   '/onboarding',
+  '/creative-email',
+  '/recruiter-email',
 ]
 
 const publicRoutes = ['/', '/about-us', '/contact', '/portfolio/view']
 
 const creatorRoutes = [
-  '/creative-homepage',
   '/creative-dashboard',
   '/job-hub',
   '/profile-card',
+  '/users/creators',
 ]
 
-const recruiterRoutes = ['/recruiter-homepage', '/recruiter-job-hub']
+const recruiterRoutes = ['/recruiter-job-hub', '/users/recruiters']
 
 export async function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname
@@ -33,30 +35,31 @@ export async function middleware(request: NextRequest) {
     path === '/favicon.ico' ||
     path.startsWith('/api/') ||
     publicRoutes.includes(path) ||
-    publicRoutes.some((route) => path.startsWith(route + '/'))
+    publicRoutes.some((route) => path.startsWith(`${route}/`))
   ) {
     return NextResponse.next()
   }
 
   // Get cookies
   const accessToken = request.cookies.get('access_token')?.value
-  const userType = request.cookies.get('userType')?.value
+  const userType = request.cookies.get('userType')?.value as
+    | 'creator'
+    | 'recruiter'
+    | undefined
   const isAuthenticated = !!accessToken
 
-  // Log for debugging in production
+  // Log for debugging
   console.log(
-    `[Middleware] Path: ${path}, Access Token: ${accessToken}, User Type: ${userType}`
+    `[Middleware] Path: ${path}, Authenticated: ${isAuthenticated}, UserType: ${userType}`
   )
 
   // Handle auth routes: Redirect authenticated users to their dashboard
   if (authRoutes.includes(path) || path.startsWith('/auth/')) {
     if (isAuthenticated && userType) {
       const dashboardUrl =
-        userType === 'creator' ? '/creative-homepage' : '/recruiter-homepage'
+        userType === 'creator' ? '/users/creators' : '/users/recruiters'
       if (path !== dashboardUrl) {
-        console.log(
-          `[Middleware] Redirecting authenticated user to ${dashboardUrl}`
-        )
+        console.log(`[Middleware] Redirecting to ${dashboardUrl}`)
         return NextResponse.redirect(new URL(dashboardUrl, request.url))
       }
     }
@@ -66,22 +69,32 @@ export async function middleware(request: NextRequest) {
   // Handle protected routes
   const isCreatorRoute =
     creatorRoutes.includes(path) ||
-    creatorRoutes.some((route) => path.startsWith(route + '/'))
+    creatorRoutes.some((route) => path.startsWith(`${route}/`)) ||
+    path.startsWith('/users/creators/')
   const isRecruiterRoute =
     recruiterRoutes.includes(path) ||
-    recruiterRoutes.some((route) => path.startsWith(route + '/'))
+    recruiterRoutes.some((route) => path.startsWith(`${route}/`)) ||
+    path.startsWith('/users/recruiters/')
+  const isUsersRoute =
+    path.startsWith('/users/') && !isCreatorRoute && !isRecruiterRoute
 
-  if (isCreatorRoute || isRecruiterRoute) {
+  if (isCreatorRoute || isRecruiterRoute || isUsersRoute) {
+    // Check authentication
     if (!isAuthenticated) {
-      console.log(
-        `[Middleware] Redirecting to /login from ${path} due to missing access_token`
+      console.log(`[Middleware] Redirecting to /login from ${path}`)
+      return NextResponse.redirect(
+        new URL(`/login?redirect=${encodeURIComponent(path)}`, request.url)
       )
-      return NextResponse.redirect(new URL('/login', request.url))
     }
 
+    // Check or infer userType
     if (!userType) {
-      // Infer userType if missing
-      const inferredType = isCreatorRoute ? 'creator' : 'recruiter'
+      // Infer userType based on route
+      const inferredType = isCreatorRoute
+        ? 'creator'
+        : isRecruiterRoute
+        ? 'recruiter'
+        : 'creator' // Default to creator for other /users/* routes
       console.log(
         `[Middleware] Setting userType to ${inferredType} for ${path}`
       )
@@ -90,18 +103,19 @@ export async function middleware(request: NextRequest) {
         path: '/',
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'strict',
-        maxAge: 7 * 24 * 60 * 60, // 7 days, matching AuthStorage
+        maxAge: 7 * 24 * 60 * 60, // 7 days
       })
       return response
     }
 
     // Redirect if userType doesn't match the route
     if (
-      (isCreatorRoute && userType === 'recruiter') ||
-      (isRecruiterRoute && userType === 'creator')
+      (isCreatorRoute && userType !== 'creator') ||
+      (isRecruiterRoute && userType !== 'recruiter') ||
+      (isUsersRoute && userType !== 'creator' && userType !== 'recruiter')
     ) {
       const redirectUrl =
-        userType === 'creator' ? '/creative-homepage' : '/recruiter-homepage'
+        userType === 'creator' ? '/users/creators' : '/users/recruiters'
       console.log(
         `[Middleware] Redirecting to ${redirectUrl} due to userType mismatch`
       )
@@ -115,11 +129,10 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     // Protected routes
-    '/(creative-homepage|creative-dashboard|job-hub|profile-card)/:path*',
-    '/(recruiter-homepage|recruiter-job-hub)/:path*',
+    '/(creative-dashboard|job-hub|profile-card|users)/:path*',
+    '/(recruiter-job-hub|users/recruiters)/:path*',
     // Auth routes
-    '/(login|sign-up|sign-in|recruiter-sign-in|recruiter-sign-up|welcome-onboarding|why-onboarding|onboarding)',
-    '/(creative-email|recruiter-email)',
+    '/(login|sign-up|sign-in|recruiter-sign-in|recruiter-sign-up|welcome-onboarding|why-onboarding|onboarding|creative-email|recruiter-email)',
     '/auth/:path*',
     // Catch-all for non-static, non-public routes
     '/((?!_next|assets|api|favicon.ico|about-us|contact|portfolio/view).*)',
