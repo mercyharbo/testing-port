@@ -1,0 +1,159 @@
+@import url("https://fonts.googleapis.com/css2?family=Urbanist:ital,wght@0,100..900;1,100..900&display=swap");
+
+@import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Raleway:ital,wght@0,100..900;1,100..900&family=Ramaraja&family=Vesper+Libre:wght@400;500;700;900&display=swap");
+
+@import url("https://fonts.googleapis.com/css2?family=Lalezar&display=swap");
+@import url("https://fonts.cdnfonts.com/css/the-next-font");
+@import url('https://fonts.googleapis.com/css2?family=Istok+Web:ital,wght@0,400;0,700;1,400;1,700&family=Lancelot&family=Lateef:wght@200;300;400;500;600;700;800&display=swap');
+@import "tailwindcss";
+@plugin "flowbite-react/plugin/tailwindcss";
+@source "../../.flowbite-react/class-list.json";
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-urbanist);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #ffffff;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Urbanist, sans-serif;
+}
+
+::-webkit-scrollbar {
+    width: 7px;
+    height: 5px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 12px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #0a1754;
+    border-radius: 1rem;
+    width: 0px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #555;
+  }
+
+@theme {
+  --color-primary: #0a1754;
+  --color-secondary: #00489a;
+  --color-textColor: #00489a;
+  --color-gray50: #f9fafb;
+  --color-gray100: #f3f4f6;
+  --color-gray200: #e5e7eb;
+  --color-red500: #fb2c36;
+  --color-purpleLight: #58337f;
+  --color-gold: #f17500;
+  --color-grayBg: #d9d9d9;
+  --color-purpleBg: #2c0358;
+  --color-semiBlack: #121212;
+  --color-lightBrown: #292929;
+  --color-brownLight: #231e1a;
+  --color-yellowGold: #ff7f00;
+  --color-yellow: #fcc92f;
+  --color-bb: #1e2234c7;
+  --color-darkBlue: #0a1754;
+  
+}
+
+@layer base {
+  h1 {
+    @apply font-bold  text-4xl sm:text-5xl lg:text-6xl text-white;
+  }
+}
+@layer utilities {
+  .bodyMargin {
+    @apply mx-3 2xl:mx-auto 2xl:w-[1300px];
+  }
+  .bg-linear-gradient {
+    @apply bg-gradient-to-r from-primary to-secondary;
+  }
+  .shadow-card {
+    @apply shadow-[0px_4px_20px_rgba(0,0,0,0.05)];
+  }
+
+  .shadow {
+    @apply shadow-[0px_5px_5px_3px_rgba(0,0,0,0.1)];
+  }
+  .heading {
+    @apply text-2xl md:text-3xl lg:text-5xl font-bold text-white;
+  }
+  .subHeading {
+    @apply text-2xl md:text-3xl lg:text-4xl font-black text-white;
+  }
+  .smallHeading {
+    @apply text-sm  md:text-lg lg:text-xl 2xl:text-2xl font-black;
+  }
+  .authStyles {
+    @apply flex flex-col justify-center;
+  }
+  .center {
+    @apply flex justify-center items-center;
+  }
+  .center-flexCol {
+    @apply flex flex-col justify-center items-center;
+  }
+
+  .font-inter {
+    font-family: var(--font-inter);
+  }
+  .font-raleway {
+    font-family: var(--font-raleway);
+  }
+  .font-vesper {
+    font-family: var(--font-vesper);
+  }
+  .font-ramaraja {
+    font-family: var(--font-ramaraja);
+  }
+  .font-urbanist {
+    font-family: var(--font-urbanist);
+  }
+  .font-montserrat {
+    font-family: var(--font-montserrat);
+  }
+  .font-lalezar {
+    font-family: var(--font-lalezar);
+  }
+  .font-lancelot {
+    font-family: var(--font-lancelot);
+  }
+  .font-lateef {
+    font-family: var(--font-lateef);
+  }
+  .font-istokWeb {
+    font-family: var(--font-istokWeb);
+  }
+  .font-next {
+    font-family: "The Next Font", sans-serif;
+  }
+}
+
+/* Hide arrows in number input for Chrome, Safari, Edge, Opera */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Hide arrows in Firefox browsers */
+input[type="number"] {
+  -moz-appearance: textfield;
+}
