@@ -16,14 +16,15 @@ const authRoutes = [
 
 const publicRoutes = ['/', '/about-us', '/contact', '/portfolio/view']
 
-const creatorRoutes = [
-  '/creative-dashboard',
-  '/job-hub',
-  '/profile-card',
-  '/users/creators',
-]
+const creatorRoutes = ['/creative-dashboard', '/job-hub', '/profile-card']
 
-const recruiterRoutes = ['/recruiter-job-hub', '/users/recruiters']
+const recruiterRoutes = ['/recruiter-job-hub']
+
+// User routes that require specific user type
+const protectedUserRoutes = {
+  creator: '/users/creators',
+  recruiter: '/users/recruiters',
+}
 
 export async function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname
@@ -67,19 +68,22 @@ export async function middleware(request: NextRequest) {
   }
 
   // Handle protected routes
+  const isUserRoute = path.startsWith('/users/')
+  const isCreatorUserRoute = path.startsWith('/users/creators')
+  const isRecruiterUserRoute = path.startsWith('/users/recruiters')
+
   const isCreatorRoute =
     creatorRoutes.includes(path) ||
     creatorRoutes.some((route) => path.startsWith(`${route}/`)) ||
-    path.startsWith('/users/creators/')
+    isCreatorUserRoute
+
   const isRecruiterRoute =
     recruiterRoutes.includes(path) ||
     recruiterRoutes.some((route) => path.startsWith(`${route}/`)) ||
-    path.startsWith('/users/recruiters/')
-  const isUsersRoute =
-    path.startsWith('/users/') && !isCreatorRoute && !isRecruiterRoute
+    isRecruiterUserRoute
 
-  if (isCreatorRoute || isRecruiterRoute || isUsersRoute) {
-    // Check authentication
+  if (isCreatorRoute || isRecruiterRoute || isUserRoute) {
+    // Check authentication first
     if (!isAuthenticated) {
       console.log(`[Middleware] Redirecting to /login from ${path}`)
       return NextResponse.redirect(
@@ -87,39 +91,33 @@ export async function middleware(request: NextRequest) {
       )
     }
 
-    // Check or infer userType
+    // Handle user type check and redirection
     if (!userType) {
-      // Infer userType based on route
-      const inferredType = isCreatorRoute
-        ? 'creator'
-        : isRecruiterRoute
-        ? 'recruiter'
-        : 'creator' // Default to creator for other /users/* routes
-      console.log(
-        `[Middleware] Setting userType to ${inferredType} for ${path}`
-      )
-      const response = NextResponse.next()
-      response.cookies.set('userType', inferredType, {
-        path: '/',
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict',
-        maxAge: 7 * 24 * 60 * 60, // 7 days
-      })
-      return response
+      console.log('[Middleware] No userType found, redirecting to login')
+      return NextResponse.redirect(new URL('/login', request.url))
     }
 
-    // Redirect if userType doesn't match the route
+    // If trying to access the wrong user type's routes
     if (
-      (isCreatorRoute && userType !== 'creator') ||
-      (isRecruiterRoute && userType !== 'recruiter') ||
-      (isUsersRoute && userType !== 'creator' && userType !== 'recruiter')
+      (isCreatorUserRoute && userType !== 'creator') ||
+      (isRecruiterUserRoute && userType !== 'recruiter')
     ) {
-      const redirectUrl =
-        userType === 'creator' ? '/users/creators' : '/users/recruiters'
+      // Redirect to their correct dashboard
+      const correctPath = protectedUserRoutes[userType]
       console.log(
-        `[Middleware] Redirecting to ${redirectUrl} due to userType mismatch`
+        `[Middleware] Redirecting user to their correct route: ${correctPath}`
       )
-      return NextResponse.redirect(new URL(redirectUrl, request.url))
+      return NextResponse.redirect(new URL(correctPath, request.url))
+    }
+
+    // If accessing a generic /users route without specific type
+    if (isUserRoute && !isCreatorUserRoute && !isRecruiterUserRoute) {
+      // Redirect to their type-specific route
+      const correctPath = protectedUserRoutes[userType]
+      console.log(
+        `[Middleware] Redirecting to type-specific route: ${correctPath}`
+      )
+      return NextResponse.redirect(new URL(correctPath, request.url))
     }
   }
 
@@ -129,8 +127,9 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     // Protected routes
-    '/(creative-dashboard|job-hub|profile-card|users)/:path*',
-    '/(recruiter-job-hub|users/recruiters)/:path*',
+    '/users/:path*',
+    '/(creative-dashboard|job-hub|profile-card)/:path*',
+    '/recruiter-job-hub/:path*',
     // Auth routes
     '/(login|sign-up|sign-in|recruiter-sign-in|recruiter-sign-up|welcome-onboarding|why-onboarding|onboarding|creative-email|recruiter-email)',
     '/auth/:path*',
