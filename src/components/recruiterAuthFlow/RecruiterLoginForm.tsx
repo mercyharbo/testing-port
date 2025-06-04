@@ -33,8 +33,14 @@ export default function RecruiterLoginForm() {
       try {
         setError('')
         const response = await RecruiterAuth.login(values)
-        toast.success(response.message || 'Login successful')
-        router.push('/recruiter-homepage') // Redirect to dashboard after successful login
+        if (response.status === 200) {
+          toast.success(response.message || 'Login successful')
+          router.push('/recruiter-homepage') // Redirect to dashboard after successful login
+        } else {
+          setError(response.message || 'Login failed. Please try again.')
+          toast.error(response.message || 'Login failed. Please try again.')
+          return
+        }
       } catch (error) {
         const errorMessage =
           error instanceof Error

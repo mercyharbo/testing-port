@@ -33,10 +33,18 @@ export default function CreatorLoginForm() {
       try {
         setError('')
         const response = await CreatorAuth.login(values)
-        toast.success(response.message || 'Login successful! Redirecting to dashboard...')
-        setTimeout(() => {
-          router.push('/creative-homepage') // Redirect to dashboard after successful login
-        }, 2500)
+        if (response.status === 200) {
+          toast.success(
+            response.message || 'Login successful! Redirecting to dashboard...'
+          )
+          setTimeout(() => {
+            router.push('/creative-homepage') // Redirect to dashboard after successful login
+          }, 2500)
+        } else {
+          setError(response.message || 'Login failed. Please try again.')
+          toast.error(response.message || 'Login failed. Please try again.')
+          return
+        }
       } catch (error) {
         const errorMessage =
           error instanceof Error
