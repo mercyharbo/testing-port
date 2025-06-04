@@ -73,6 +73,7 @@ export const AuthStorage = {
   setAuth: (
     token: string,
     userType: 'creator' | 'recruiter',
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     userData: any,
     email?: string
   ) => {
@@ -113,7 +114,7 @@ export const AuthStorage = {
     const userType = cookies.get('userType')
     return userType as 'creator' | 'recruiter' | null
   },
-
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   getUserData: <T = any>(): T | null => {
     const data = cookies.get('userData')
     if (!data) return null
