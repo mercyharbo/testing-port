@@ -71,10 +71,10 @@ export const handleApiError = (error: AxiosError<ErrorResponse>) => {
 // Auth storage management
 export const AuthStorage = {
   setAuth: (
-    token: string,
-    userType: 'creator' | 'recruiter',
+    token?: string,
+    userType?: 'creator' | 'recruiter',
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    userData: any,
+    userData?: any,
     email?: string
   ) => {
     const options = {
@@ -150,9 +150,9 @@ export const CreatorAuth = {
 
       if (response.data.token) {
         AuthStorage.setAuth(
-          response.data.token,
-          'creator',
-          response.data.data,
+          // response.data.token,
+          // 'creator',
+          // response.data.data,
           formData.email
         )
       }
