@@ -85,12 +85,24 @@ export const AuthStorage = {
     }
 
     try {
+      // Set all cookies synchronously to ensure consistency
       cookies.set('access_token', token, options)
       cookies.set('userType', userType, options)
       cookies.set('userData', JSON.stringify(userData), options) // Ensure userData is stringified
       if (email) cookies.set('userEmail', email, options)
+
+      // Verify cookies were set successfully
+      const tokenSet = cookies.get('access_token') === token
+      const userTypeSet = cookies.get('userType') === userType
+      const userDataSet = cookies.get('userData') !== undefined
+
+      if (!tokenSet || !userTypeSet || !userDataSet) {
+        console.error('Cookie verification failed after setting')
+        throw new Error('Failed to set authentication cookies')
+      }
     } catch (error) {
       console.error('Error setting auth cookies:', error)
+      throw error
     }
   },
 
@@ -171,11 +183,15 @@ export const CreatorAuth = {
       )
 
       if (response.data.access_token) {
-        AuthStorage.setAuth(
-          response.data.access_token,
-          'creator',
-          response.data.profile
-        )
+        await new Promise<void>((resolve) => {
+          AuthStorage.setAuth(
+            response.data.access_token,
+            'creator',
+            response.data.profile
+          )
+          // Short delay to ensure cookies are set before proceeding
+          setTimeout(resolve, 100)
+        })
       }
 
       return response.data

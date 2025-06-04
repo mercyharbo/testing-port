@@ -37,7 +37,10 @@ export default function CreatorLoginForm() {
           toast.success(
             response.message || 'Login successful! Redirecting to dashboard...'
           )
-          router.push('/creative-homepage')
+          // Small delay to ensure cookies are properly set before navigation
+          setTimeout(() => {
+            router.push('/creative-homepage')
+          }, 500)
         } else {
           setError(response.message || 'Login failed. Please try again.')
           toast.error(response.message || 'Login failed. Please try again.')
