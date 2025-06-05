@@ -36,7 +36,10 @@ export default function RecruiterLoginForm() {
         const response = await RecruiterAuth.login(values)
         if (response.status === 200) {
           toast.success(response.message || 'Login successful')
-          router.push('/recruiter-homepage') // Redirect to dashboard after successful login
+
+          setTimeout(() => {
+            router.push('/recruiter-homepage')
+          }, 5000)
         } else {
           setError(response.message || 'Login failed. Please try again.')
           toast.error(response.message || 'Login failed. Please try again.')
