@@ -40,7 +40,7 @@ export default function CreatorLoginForm() {
           // Small delay to ensure cookies are properly set before navigation
           setTimeout(() => {
             router.push('/users/creators')
-          }, 500)
+          }, 5000)
           // setTimeout(() => {
           //   router.push('/creative-homepage')
           // }, 500)

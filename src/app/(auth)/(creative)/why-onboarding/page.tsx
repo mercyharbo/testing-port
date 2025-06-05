@@ -26,7 +26,7 @@ const WhyOnboardingContent = () => {
   const features =
     userType === 'recruiter' ? recruiterFeatures : creativeFeatures
   const dashboardUrl =
-    userType === 'recruiter' ? '/recruiter-homepage' : '/users/creators'
+    userType === 'recruiter' ? '/recruiter-sign-in' : 'sign-in'
   // const dashboardUrl =
   //   userType === 'recruiter' ? '/recruiter-homepage' : '/creative-homepage'
 
